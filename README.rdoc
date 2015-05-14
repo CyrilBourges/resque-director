@@ -5,6 +5,7 @@ Resque Director is a plugin for the Resque queueing system (http://github.com/de
 ==About
 
 Resque-director is useful for when you are managing a large number of workers and don't want to waste resources keeping all of them waiting when they are not being used. For jobs that are high priority or time sensitive you can have it autoscale workers based on how long it takes to go through the queue, or how big the queue becomes. In queues where the influx of jobs can change dramatically from time to time, resque director automatically scales more workers during the times when the queue is filling up more quickly, and less in the opposite scenario. Different queues can be given different directions as well.
+Notice: Spec file did not working because this current branch was rewrited to be able to set multiple Jobs on the same project.
 
 == Usage
 
