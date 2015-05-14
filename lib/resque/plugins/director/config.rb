@@ -2,7 +2,7 @@ module Resque
   module Plugins
     module Director
       class Config
-        attr_accessor :queue
+        attr_writer :queue
 
         DEFAULT_OPTIONS = {
           :min_workers        => 1,
@@ -14,7 +14,8 @@ module Resque
           :stop_override      => nil,
           :logger             => nil,
           :log_level          => :debug,
-          :no_enqueue_scale   => false
+          :no_enqueue_scale   => false,
+          :queue              => nil
         }
         DEFAULT_OPTIONS.each do |key, _|
           attr_reader key
