@@ -1,7 +1,13 @@
+
+require 'resque-remora'
+require 'resque/plugins/director/config'
+require 'resque/plugins/director/scaler'
+
 module Resque
   module Plugins
     module Director
       include Resque::Plugins::Remora
+      include Resque::Plugins::Director::Scaler
 
       def attach_remora
         {:created_at => Time.now.utc.to_i}
@@ -15,18 +21,17 @@ module Resque
 
       def direct(options={})
         @config = Config.new(options)
-        @config.queue = options[:queue]
       end
 
       def after_enqueue_scale_workers(*args)
         set_queue
         return if @config.no_enqueue_scale
-        Scaler.scale_within_requirements(@config)
+        self.scale_within_requirements
       end
 
       def before_perform_direct_workers(*args)
         set_queue
-        Scaler.scale_within_requirements(@config) if @config.no_enqueue_scale
+        self.scale_within_requirements if @config.no_enqueue_scale
       end
 
       def after_pop_direct_workers(start_time=Time.now.utc)
@@ -37,22 +42,22 @@ module Resque
         jobs_in_queue = Resque.size(@queue.to_s)
 
         if scale_up?(time_through_queue, jobs_in_queue)
-          Scaler.scale_up(@config)
+          self.scale_up
         elsif scale_down?(time_through_queue, jobs_in_queue)
-          Scaler.scale_down(@config)
+          self.scale_down
         end
       end
 
       def after_perform_direct_workers(*args)
         set_queue
         jobs_in_queue = Resque.size(@queue.to_s)
-        Scaler.scale_down_to_minimum(@config) if jobs_in_queue == 0
+        self.scale_down_to_minimum if jobs_in_queue == 0
       end
 
       def on_failure_direct_workers(*args)
         set_queue
         jobs_in_queue = Resque.size(@queue.to_s)
-        Scaler.scale_down_to_minimum(@config) if jobs_in_queue == 0
+        self.scale_down_to_minimum if jobs_in_queue == 0
       end
 
       private
